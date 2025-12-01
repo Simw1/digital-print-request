@@ -69,6 +69,23 @@
 // CONFIGURATION
 // ============================================================================
 
+/**
+ * PARENT FOLDER ID FOR UPLOAD FOLDERS
+ * ------------------------------------
+ * Each print request creates a subfolder for file uploads.
+ * These subfolders are created inside a parent folder you specify here.
+ *
+ * TO SET THIS UP:
+ * 1. Go to Google Drive (https://drive.google.com)
+ * 2. Create a new folder called "Print Requests" (or similar)
+ * 3. Open that folder
+ * 4. Look at the URL - it will be something like:
+ *    https://drive.google.com/drive/folders/1ABCxyz123456789
+ * 5. Copy the long string after /folders/ (e.g., "1ABCxyz123456789")
+ * 6. Paste it below, replacing 'YOUR_FOLDER_ID_HERE'
+ */
+const PARENT_FOLDER_ID = 'YOUR_FOLDER_ID_HERE';
+
 const CONFIG = {
   // Email settings
   senderName: 'Harrow Digital Print',
@@ -92,6 +109,7 @@ const HEADERS = [
   'Timestamp',
   'Reference',
   'Status',
+  'Upload Folder',
   'First Name',
   'Surname',
   'Email',
@@ -156,6 +174,22 @@ function doPost(e) {
       throw new Error('Quantity must be a positive number');
     }
 
+    // Create a Google Drive folder for this submission
+    let folderUrl = '';
+    try {
+      const parentFolder = DriveApp.getFolderById(PARENT_FOLDER_ID);
+      const submissionFolder = parentFolder.createFolder(data.referenceNumber);
+
+      // Set sharing to "anyone with the link can edit"
+      submissionFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
+
+      folderUrl = submissionFolder.getUrl();
+    } catch (folderError) {
+      console.error('Failed to create upload folder:', folderError);
+      // Continue without folder - submission can still proceed
+      folderUrl = 'Folder creation failed';
+    }
+
     // Get the active spreadsheet and sheet
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(CONFIG.sheetName);
@@ -184,6 +218,7 @@ function doPost(e) {
       timestamp,                                    // Timestamp
       data.referenceNumber,                         // Reference
       CONFIG.statuses.NEW,                          // Status
+      folderUrl,                                    // Upload Folder
       data.firstName,                               // First Name
       data.surname,                                 // Surname
       data.email,                                   // Email
@@ -193,7 +228,7 @@ function doPost(e) {
       data.paperType,                               // Paper Type
       data.paperCategory,                           // Paper Category
       data.quantity,                                // Quantity
-      '�' + data.totalPrice.toFixed(2),            // Estimated Price
+      '£' + data.totalPrice.toFixed(2),            // Estimated Price
       data.checkDpi ? 'Yes' : 'No',                // DPI Check
       data.checkRgb ? 'Yes' : 'No',                // RGB Check
       data.checkFlattened ? 'Yes' : 'No',          // Flattened Check
@@ -219,7 +254,8 @@ function doPost(e) {
       .createTextOutput(JSON.stringify({
         status: 'success',
         message: 'Request submitted successfully',
-        referenceNumber: data.referenceNumber
+        referenceNumber: data.referenceNumber,
+        folderUrl: folderUrl
       }))
       .setMimeType(ContentService.MimeType.JSON);
 
@@ -275,8 +311,9 @@ function createHeaders(sheet) {
   sheet.setColumnWidth(1, 150);  // Timestamp
   sheet.setColumnWidth(2, 100);  // Reference
   sheet.setColumnWidth(3, 120);  // Status
-  sheet.setColumnWidth(17, 200); // Notes
-  sheet.setColumnWidth(19, 200); // Technician Notes
+  sheet.setColumnWidth(4, 250);  // Upload Folder
+  sheet.setColumnWidth(18, 200); // Notes (shifted by 1 due to new column)
+  sheet.setColumnWidth(20, 200); // Technician Notes (shifted by 1 due to new column)
 }
 
 /**
