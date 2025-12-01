@@ -1184,35 +1184,47 @@
             const formData = collectFormData(referenceNumber);
 
             try {
-                const response = await fetch(CONFIG.googleScriptUrl, {
+                // Step 1: Submit form data (no-cors mode - can't read response)
+                await fetch(CONFIG.googleScriptUrl, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(formData)
                 });
 
-                const result = await response.json();
+                // Step 2: Wait a moment for the server to process
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                if (result.status === 'success') {
-                    formContainer.classList.add('hidden');
-                    successMessage.classList.add('show');
-                    document.getElementById('referenceNumber').textContent = referenceNumber;
-
-                    // Set folder URL from response, or fall back to a message
-                    const uploadLink = document.getElementById('uploadLink');
-                    if (result.folderUrl && result.folderUrl.includes('drive.google.com')) {
-                        uploadLink.href = result.folderUrl;
-                    } else {
-                        // Folder creation failed - show message
-                        uploadLink.textContent = 'Folder unavailable - check your email';
-                        uploadLink.removeAttribute('href');
-                        uploadLink.style.background = 'var(--stone-muted)';
-                        uploadLink.style.cursor = 'default';
+                // Step 3: Fetch the folder URL using GET request
+                let folderUrl = '';
+                try {
+                    const lookupResponse = await fetch(`${CONFIG.googleScriptUrl}?ref=${encodeURIComponent(referenceNumber)}`);
+                    const lookupResult = await lookupResponse.json();
+                    if (lookupResult.status === 'success' && lookupResult.folderUrl) {
+                        folderUrl = lookupResult.folderUrl;
                     }
-
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    throw new Error(result.message || 'Submission failed');
+                } catch (lookupError) {
+                    console.warn('Could not retrieve folder URL:', lookupError);
                 }
+
+                // Show success message
+                formContainer.classList.add('hidden');
+                successMessage.classList.add('show');
+                document.getElementById('referenceNumber').textContent = referenceNumber;
+
+                // Set folder URL or show fallback
+                const uploadLink = document.getElementById('uploadLink');
+                if (folderUrl && folderUrl.includes('drive.google.com')) {
+                    uploadLink.href = folderUrl;
+                } else {
+                    // Folder creation failed or lookup failed - show message
+                    uploadLink.textContent = 'Folder unavailable - check your email';
+                    uploadLink.removeAttribute('href');
+                    uploadLink.style.background = 'var(--stone-muted)';
+                    uploadLink.style.cursor = 'default';
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
 
             } catch (error) {
                 console.error('Submission error:', error);

@@ -134,9 +134,68 @@ const HEADERS = [
 
 /**
  * Handles GET requests to the web app
- * Returns a simple status message to confirm the API is running
+ *
+ * If called with ?ref=PR-XXXXXX parameter, returns the folder URL for that reference
+ * Otherwise returns a simple status message to confirm the API is running
  */
 function doGet(e) {
+  // Check if a reference number was provided
+  const ref = e.parameter.ref;
+
+  if (ref) {
+    // Look up the folder URL for this reference
+    try {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheetName)
+                    || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0];
+
+      // Find column indices
+      const refCol = headers.indexOf('Reference');
+      const folderCol = headers.indexOf('Upload Folder');
+
+      if (refCol === -1 || folderCol === -1) {
+        return ContentService
+          .createTextOutput(JSON.stringify({
+            status: 'error',
+            message: 'Required columns not found'
+          }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      // Search for the reference number
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][refCol] === ref) {
+          const folderUrl = data[i][folderCol];
+          return ContentService
+            .createTextOutput(JSON.stringify({
+              status: 'success',
+              referenceNumber: ref,
+              folderUrl: folderUrl || ''
+            }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+
+      // Reference not found
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: 'error',
+          message: 'Reference number not found'
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+
+    } catch (error) {
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: 'error',
+          message: error.toString()
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // Default: return status message
   return ContentService
     .createTextOutput(JSON.stringify({
       status: 'success',
