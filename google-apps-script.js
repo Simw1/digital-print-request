@@ -852,3 +852,134 @@ function manuallyCreateHeaders() {
   createHeaders(sheet);
   console.log('Headers created successfully');
 }
+
+// ============================================================================
+// AUTOMATED CLEANUP
+// ============================================================================
+
+/**
+ * Cleans up old completed submissions by deleting their Google Drive folders
+ *
+ * This function:
+ * 1. Finds all rows with Status = "Collected"
+ * 2. Checks if Ready Date is more than 14 days ago
+ * 3. Deletes the associated Google Drive folder
+ * 4. Updates the Upload Folder cell to "Deleted - [date]"
+ *
+ * HOW TO SET UP AUTOMATIC DAILY CLEANUP:
+ * --------------------------------------
+ * 1. In the Apps Script editor, click the clock icon (Triggers) in the left sidebar
+ * 2. Click "+ Add Trigger" in the bottom right
+ * 3. Configure the trigger:
+ *    - Choose which function to run: cleanupOldSubmissions
+ *    - Choose which deployment should run: Head
+ *    - Select event source: Time-driven
+ *    - Select type of time based trigger: Day timer
+ *    - Select time of day: 2am to 3am (or your preferred time)
+ * 4. Click "Save"
+ *
+ * The cleanup will now run automatically every day at the specified time.
+ */
+function cleanupOldSubmissions() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.sheetName)
+                || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+
+  // Find column indices
+  const statusCol = headers.indexOf('Status');
+  const uploadFolderCol = headers.indexOf('Upload Folder');
+  const readyDateCol = headers.indexOf('Ready Date');
+  const referenceCol = headers.indexOf('Reference');
+
+  if (statusCol === -1 || uploadFolderCol === -1 || readyDateCol === -1) {
+    console.error('Required columns not found');
+    return;
+  }
+
+  const now = new Date();
+  const fourteenDaysAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
+  let deletedCount = 0;
+  let skippedCount = 0;
+
+  console.log(`Starting cleanup. Looking for items collected before ${fourteenDaysAgo.toLocaleDateString('en-GB')}`);
+
+  // Process rows from bottom to top (in case we need to delete rows in future)
+  for (let i = data.length - 1; i >= 1; i--) {
+    const row = data[i];
+    const status = row[statusCol];
+    const uploadFolderUrl = row[uploadFolderCol];
+    const readyDate = row[readyDateCol];
+    const reference = row[referenceCol];
+
+    // Skip if not "Collected"
+    if (status !== CONFIG.statuses.COLLECTED) {
+      continue;
+    }
+
+    // Skip if no ready date
+    if (!readyDate) {
+      continue;
+    }
+
+    // Skip if already deleted
+    if (uploadFolderUrl && uploadFolderUrl.toString().startsWith('Deleted')) {
+      continue;
+    }
+
+    // Parse the ready date
+    let readyDateObj;
+    if (readyDate instanceof Date) {
+      readyDateObj = readyDate;
+    } else {
+      // Try to parse the date string (handles DD/MM/YYYY format)
+      const parts = readyDate.toString().split(/[\/\-]/);
+      if (parts.length === 3) {
+        // Assume DD/MM/YYYY format
+        readyDateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+      } else {
+        readyDateObj = new Date(readyDate);
+      }
+    }
+
+    // Skip if date is invalid
+    if (isNaN(readyDateObj.getTime())) {
+      console.log(`Skipping ${reference}: Invalid ready date`);
+      skippedCount++;
+      continue;
+    }
+
+    // Skip if not old enough
+    if (readyDateObj > fourteenDaysAgo) {
+      continue;
+    }
+
+    // Try to delete the folder
+    const deletionDate = new Date().toLocaleDateString('en-GB');
+
+    if (uploadFolderUrl && uploadFolderUrl.toString().includes('drive.google.com')) {
+      try {
+        // Extract folder ID from URL
+        // URL format: https://drive.google.com/drive/folders/FOLDER_ID
+        const folderIdMatch = uploadFolderUrl.toString().match(/folders\/([a-zA-Z0-9_-]+)/);
+
+        if (folderIdMatch && folderIdMatch[1]) {
+          const folderId = folderIdMatch[1];
+          const folder = DriveApp.getFolderById(folderId);
+          folder.setTrashed(true);
+          console.log(`Deleted folder for ${reference} (Ready: ${readyDateObj.toLocaleDateString('en-GB')})`);
+        }
+      } catch (folderError) {
+        // Folder might already be deleted or inaccessible - that's okay
+        console.log(`Could not delete folder for ${reference}: ${folderError.message}`);
+      }
+    }
+
+    // Update the cell to show it's been deleted
+    sheet.getRange(i + 1, uploadFolderCol + 1).setValue(`Deleted - ${deletionDate}`);
+    deletedCount++;
+  }
+
+  console.log(`Cleanup complete. Deleted: ${deletedCount}, Skipped: ${skippedCount}`);
+}
