@@ -634,6 +634,13 @@
             height: 14px;
         }
 
+        .upload-note {
+            font-size: 0.75rem;
+            color: var(--stone-light);
+            margin-top: var(--space-3);
+            margin-bottom: 0;
+        }
+
         /* Form states */
         .form-container.hidden {
             display: none;
@@ -967,11 +974,12 @@
 
                 <div class="next-step">
                     <div class="next-step-label">Next step</div>
-                    <p>Upload your print file and include the reference number above.</p>
+                    <p>Upload your print files to your personal folder. No sign-in required - just drag and drop.</p>
                     <a href="#" class="upload-link" id="uploadLink" target="_blank">
-                        Upload files
+                        Open upload folder
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                     </a>
+                    <p class="upload-note">Please delete your files after collecting your prints.</p>
                 </div>
             </div>
         </div>
@@ -984,8 +992,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            googleScriptUrl: 'https://script.google.com/macros/s/AKfycbxir0fSG0R1MTAjJgrdqSxjjDZPADbSrKNF8P3JzLMIeZGUNT2RwJ2GRwUkfH8pXU1U/exec',
-            msFormsUrl: 'https://forms.office.com/Pages/DesignPageV2.aspx?prevorigin=shell&origin=NeoPortalPage&subpage=design&id=_5c8u7URN0uSzxiXsth2awTdY3H18Y5CunlNfmsd1JRUOE43UU1CUlcwQUk0OTYxRThTNE5EQUVJNi4u'
+            googleScriptUrl: 'https://script.google.com/macros/s/AKfycbxir0fSG0R1MTAjJgrdqSxjjDZPADbSrKNF8P3JzLMIeZGUNT2RwJ2GRwUkfH8pXU1U/exec'
         };
 
         // Price matrix
@@ -1177,22 +1184,35 @@
             const formData = collectFormData(referenceNumber);
 
             try {
-                await fetch(CONFIG.googleScriptUrl, {
+                const response = await fetch(CONFIG.googleScriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(formData)
                 });
 
-                formContainer.classList.add('hidden');
-                successMessage.classList.add('show');
-                document.getElementById('referenceNumber').textContent = referenceNumber;
+                const result = await response.json();
 
-                const uploadUrl = new URL(CONFIG.msFormsUrl);
-                uploadUrl.searchParams.set('ref', referenceNumber);
-                document.getElementById('uploadLink').href = uploadUrl.toString();
+                if (result.status === 'success') {
+                    formContainer.classList.add('hidden');
+                    successMessage.classList.add('show');
+                    document.getElementById('referenceNumber').textContent = referenceNumber;
 
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Set folder URL from response, or fall back to a message
+                    const uploadLink = document.getElementById('uploadLink');
+                    if (result.folderUrl && result.folderUrl.includes('drive.google.com')) {
+                        uploadLink.href = result.folderUrl;
+                    } else {
+                        // Folder creation failed - show message
+                        uploadLink.textContent = 'Folder unavailable - check your email';
+                        uploadLink.removeAttribute('href');
+                        uploadLink.style.background = 'var(--stone-muted)';
+                        uploadLink.style.cursor = 'default';
+                    }
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(result.message || 'Submission failed');
+                }
 
             } catch (error) {
                 console.error('Submission error:', error);
