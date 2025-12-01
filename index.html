@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Print Request | University of Westminster Harrow</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a8a;
+            --primary-dark: #152a45;
+            --accent: #4a90d9;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --text: #333;
+            --text-light: #666;
+            --bg: #f5f7fa;
+            --white: #fff;
+            --border: #ddd;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-box h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-box h2::before {
+            content: "9";
+        }
+
+        .info-box ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        .info-box .turnaround {
+            background: rgba(255,255,255,0.15);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .form-section {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-section h3 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--error);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.2);
+        }
+
+        select {
+            cursor: pointer;
+            background: var(--white);
+        }
+
+        optgroup {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        option {
+            font-weight: normal;
+            color: var(--text);
+            padding: 5px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .price-display {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .price-display .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .price-display .amount {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .price-display .breakdown {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            margin-bottom: 15px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .checkbox-label:hover {
+            background: #e8edf3;
+        }
+
+        .checkbox-label.error {
+            border: 2px solid var(--error);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-content {
+            flex: 1;
+        }
+
+        .checkbox-content .check-text {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .checkbox-content .check-hint {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 3px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .success-message {
+            display: none;
+            background: var(--white);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: var(--white);
+        }
+
+        .success-message h2 {
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+
+        .reference-number {
+            background: var(--bg);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        .success-message p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .upload-link {
+            display: inline-block;
+            padding: 15px 30px;
+            background: var(--primary);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-link:hover {
+            background: var(--primary-light);
+        }
+
+        .form-container.hidden {
+            display: none;
+        }
+
+        .error-text {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            border-color: var(--error);
+        }
+
+        .form-group.error .error-text {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            .form-section {
+                padding: 20px 15px;
+            }
+
+            .price-display .amount {
+                font-size: 1.6rem;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Digital Print Request</h1>
+        <p>University of Westminster Harrow Digital Print</p>
+    </header>
+
+    <div class="container">
+        <div class="info-box">
+            <h2>How to Submit Your Print Request</h2>
+            <ol>
+                <li><strong>Complete this form</strong>  Enter your print configuration and details below</li>
+                <li><strong>Upload your files</strong>  After submitting, you'll receive a link to upload your print files via Microsoft Forms</li>
+            </ol>
+            <div class="turnaround">� Turnaround time: 23 working days</div>
+        </div>
+
+        <div class="form-container" id="formContainer">
+            <form id="printRequestForm" novalidate>
+                <!-- Print Configuration -->
+                <div class="form-section">
+                    <h3>Print Configuration</h3>
+
+                    <div class="form-group">
+                        <label for="printSize" class="required">Print Size</label>
+                        <select id="printSize" name="printSize" required>
+                            <option value="">Select a size...</option>
+                            <option value="B0" data-dimensions="1000 x 1414 mm" data-plain="10" data-standard="80" data-fibre="112">B0  1000 � 1414 mm</option>
+                            <option value="A0" data-dimensions="841 x 1189 mm" data-plain="5" data-standard="40" data-fibre="56">A0  841 � 1189 mm</option>
+                            <option value="A1" data-dimensions="594 x 841 mm" data-plain="2.50" data-standard="20" data-fibre="28">A1  594 � 841 mm</option>
+                            <option value="A2" data-dimensions="420 x 594 mm" data-plain="1.25" data-standard="10" data-fibre="14">A2  420 � 594 mm</option>
+                            <option value="A3" data-dimensions="297 x 420 mm" data-plain="" data-standard="5" data-fibre="7">A3  297 � 420 mm</option>
+                            <option value="A4" data-dimensions="210 x 297 mm" data-plain="" data-standard="2.50" data-fibre="">A4  210 � 297 mm</option>
+                        </select>
+                        <span class="error-text">Please select a print size</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paperType" class="required">Paper Type</label>
+                        <select id="paperType" name="paperType" required>
+                            <option value="">Select a paper type...</option>
+                            <optgroup label="Standard Papers">
+                                <option value="Spectrum Pinnacle Glossy 270gsm" data-category="standard">Spectrum Pinnacle Glossy 270gsm</option>
+                                <option value="Metallic Gloss 260gsm" data-category="standard">Metallic Gloss 260gsm</option>
+                                <option value="Lustre 300gsm" data-category="standard">Lustre 300gsm</option>
+                                <option value="Satin 270gsm" data-category="standard">Satin 270gsm</option>
+                                <option value="Pearl 295gsm" data-category="standard">Pearl 295gsm</option>
+                                <option value="Matte 230gsm" data-category="standard">Matte 230gsm</option>
+                                <option value="Matte Double Sided 170gsm" data-category="standard" data-max-size="A3">Matte Double Sided 170gsm (A3 max)</option>
+                                <option value="Semigloss Double Sided 250gsm" data-category="standard" data-max-size="A3">Semigloss Double Sided 250gsm (A3 max)</option>
+                                <option value="Epson Premium Semigloss 251gsm" data-category="standard">Epson Premium Semigloss 251gsm</option>
+                                <option value="Fujifilm HI White Smooth Art 260gsm" data-category="standard">Fujifilm HI White Smooth Art 260gsm</option>
+                                <option value="Tetanal IYT-101 You Tac Textile" data-category="standard">Tetanal IYT-101 You Tac Textile</option>
+                                <option value="Kodak Universal Backlit Film" data-category="standard">Kodak Universal Backlit Film</option>
+                                <option value="Fotospeed DC Film" data-category="standard">Fotospeed DC Film</option>
+                            </optgroup>
+                            <optgroup label="Fibre Based Papers">
+                                <option value="Hahnem�hle Photo Rag Matt 308gsm" data-category="fibre">Hahnem�hle Photo Rag Matt 308gsm</option>
+                                <option value="Hahnem�hle FineArt Pearl Gloss 285gsm" data-category="fibre">Hahnem�hle FineArt Pearl Gloss 285gsm</option>
+                                <option value="Fujifilm Fine Art Fibre Baryta Gloss 310gsm" data-category="fibre">Fujifilm Fine Art Fibre Baryta Gloss 310gsm</option>
+                            </optgroup>
+                            <optgroup label="Plain Paper">
+                                <option value="Fujifilm Matte Bond 120gsm" data-category="plain">Fujifilm Matte Bond 120gsm</option>
+                            </optgroup>
+                        </select>
+                        <span class="error-text">Please select a paper type</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity" class="required">Quantity</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                        <span class="error-text">Please enter a valid quantity</span>
+                    </div>
+
+                    <div class="price-display" id="priceDisplay">
+                        <div class="label">Estimated Total</div>
+                        <div class="amount" id="totalPrice">�0.00</div>
+                        <div class="breakdown" id="priceBreakdown">Select size and paper type to see pricing</div>
+                    </div>
+                </div>
+
+                <!-- Pre-flight Checks -->
+                <div class="form-section">
+                    <h3>Pre-flight Checks</h3>
+                    <p style="margin-bottom: 20px; color: var(--text-light);">Please confirm the following before submitting:</p>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="checkDpi" name="checkDpi" required>
+                            <div class="checkbox-content">
+                                <div class="check-text">My image is minimum 300 DPI</div>
+                                <div class="check-hint">In Photoshop: Image � Image Size � Resolution</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="checkRgb" name="checkRgb" required>
+                            <div class="checkbox-content">
+                                <div class="check-text">My image is in RGB colour mode</div>
+                                <div class="check-hint">In Photoshop: Image � Mode � RGB Color</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="checkFlattened" name="checkFlattened" required>
+                            <div class="checkbox-content">
+                                <div class="check-text">My image layers are flattened</div>
+                                <div class="check-hint">Save a copy first, then: Layer � Flatten Image</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Your Details -->
+                <div class="form-section">
+                    <h3>Your Details</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName" class="required">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                            <span class="error-text">Please enter your first name</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="surname" class="required">Surname</label>
+                            <input type="text" id="surname" name="surname" required>
+                            <span class="error-text">Please enter your surname</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email" class="required">University Email</label>
+                            <input type="email" id="email" name="email" placeholder="w1234567@my.westminster.ac.uk" required>
+                            <span class="error-text">Please enter a valid university email</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="universityId" class="required">University ID</label>
+                            <input type="text" id="universityId" name="universityId" placeholder="e.g. w1234567" required>
+                            <span class="error-text">Please enter your university ID</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="course" class="required">Course</label>
+                        <select id="course" name="course" required>
+                            <option value="">Select your course...</option>
+                            <optgroup label="Undergraduate (UG)">
+                                <option value="BA Photography">BA Photography</option>
+                                <option value="BA Animation">BA Animation</option>
+                                <option value="BA/BMus Music">BA/BMus Music</option>
+                                <option value="BA Contemporary Media Practice">BA Contemporary Media Practice</option>
+                                <option value="BA Digital Media and Communication">BA Digital Media and Communication</option>
+                                <option value="BA Fashion Buying Management">BA Fashion Buying Management</option>
+                                <option value="BA Fashion Design">BA Fashion Design</option>
+                                <option value="BA Fashion Marketing and Promotion">BA Fashion Marketing and Promotion</option>
+                                <option value="BA Fashion Merchandise Management">BA Fashion Merchandise Management</option>
+                                <option value="BA Film">BA Film</option>
+                                <option value="BA Fine Art Mixed Media">BA Fine Art Mixed Media</option>
+                                <option value="BA Graphic Communication Design">BA Graphic Communication Design</option>
+                                <option value="BA Illustration and Visual Communication">BA Illustration and Visual Communication</option>
+                                <option value="BA Journalism">BA Journalism</option>
+                                <option value="BA Public Relations and Advertising">BA Public Relations and Advertising</option>
+                                <option value="BA Radio and Digital Production">BA Radio and Digital Production</option>
+                                <option value="BA Television Production">BA Television Production</option>
+                            </optgroup>
+                            <optgroup label="Postgraduate (PG)">
+                                <option value="MA Photographic Arts">MA Photographic Arts</option>
+                                <option value="MA Documentary and Photojournalism">MA Documentary and Photojournalism</option>
+                                <option value="MA Audio Production">MA Audio Production</option>
+                                <option value="MA Communication">MA Communication</option>
+                                <option value="MA Digital and Interactive Storytelling LAB">MA Digital and Interactive Storytelling LAB</option>
+                                <option value="MA Diversity and the Media">MA Diversity and the Media</option>
+                                <option value="MA Fashion Business Management">MA Fashion Business Management</option>
+                                <option value="MA Film Television and Moving Image">MA Film Television and Moving Image</option>
+                                <option value="MA Global Media">MA Global Media</option>
+                                <option value="MA Global Media Business">MA Global Media Business</option>
+                                <option value="MA Interactive Media Practice">MA Interactive Media Practice</option>
+                                <option value="MA International Media Business">MA International Media Business</option>
+                                <option value="MA Media and Development">MA Media and Development</option>
+                                <option value="MA Media Campaigning and Social Change">MA Media Campaigning and Social Change</option>
+                            </optgroup>
+                            <optgroup label="Other">
+                                <option value="Staff">Staff</option>
+                                <option value="Other">Other</option>
+                            </optgroup>
+                        </select>
+                        <span class="error-text">Please select your course</span>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+
+                    <div class="form-group">
+                        <label for="notes">Extra Notes</label>
+                        <textarea id="notes" name="notes" placeholder="Any special requirements or additional information..."></textarea>
+                        <p class="hint">Optional  include any specific instructions for your print</p>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-section">
+                    <button type="submit" class="submit-btn" id="submitBtn">Submit Print Request</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon"></div>
+            <h2>Request Submitted Successfully!</h2>
+            <p>Your print request has been received. Please save your reference number:</p>
+            <div class="reference-number" id="referenceNumber">PR-000000</div>
+            <p>Next step: Upload your print file(s) using the link below.<br>Please include your reference number when uploading.</p>
+            <a href="#" class="upload-link" id="uploadLink" target="_blank">Upload Files via Microsoft Forms �</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>� University of Westminster Harrow Digital Print</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - Update these URLs as needed
+        // ============================================
+        const CONFIG = {
+            googleScriptUrl: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+            msFormsUrl: 'https://forms.office.com/Pages/ResponsePage.aspx?id=YOUR_FORM_ID'
+        };
+
+        // Price matrix
+        const PRICES = {
+            B0: { plain: 10, standard: 80, fibre: 112 },
+            A0: { plain: 5, standard: 40, fibre: 56 },
+            A1: { plain: 2.50, standard: 20, fibre: 28 },
+            A2: { plain: 1.25, standard: 10, fibre: 14 },
+            A3: { plain: null, standard: 5, fibre: 7 },
+            A4: { plain: null, standard: 2.50, fibre: null }
+        };
+
+        // Size hierarchy for validation
+        const SIZE_ORDER = ['A4', 'A3', 'A2', 'A1', 'A0', 'B0'];
+
+        // DOM Elements
+        const form = document.getElementById('printRequestForm');
+        const formContainer = document.getElementById('formContainer');
+        const successMessage = document.getElementById('successMessage');
+        const printSizeSelect = document.getElementById('printSize');
+        const paperTypeSelect = document.getElementById('paperType');
+        const quantityInput = document.getElementById('quantity');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const priceBreakdownEl = document.getElementById('priceBreakdown');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Calculate and update price
+        function updatePrice() {
+            const size = printSizeSelect.value;
+            const paperOption = paperTypeSelect.selectedOptions[0];
+            const quantity = parseInt(quantityInput.value) || 1;
+
+            if (!size || !paperOption || !paperOption.value) {
+                totalPriceEl.textContent = '�0.00';
+                priceBreakdownEl.textContent = 'Select size and paper type to see pricing';
+                return;
+            }
+
+            const category = paperOption.dataset.category;
+            const pricePerUnit = PRICES[size]?.[category];
+
+            if (pricePerUnit === null || pricePerUnit === undefined) {
+                totalPriceEl.textContent = 'N/A';
+                priceBreakdownEl.textContent = 'This combination is not available';
+                return;
+            }
+
+            const total = pricePerUnit * quantity;
+            totalPriceEl.textContent = `�${total.toFixed(2)}`;
+            priceBreakdownEl.textContent = `�${pricePerUnit.toFixed(2)} � ${quantity} ${quantity === 1 ? 'print' : 'prints'}`;
+        }
+
+        // Filter paper options based on selected size
+        function filterPaperOptions() {
+            const size = printSizeSelect.value;
+            const options = paperTypeSelect.querySelectorAll('option[data-category]');
+
+            options.forEach(option => {
+                const maxSize = option.dataset.maxSize;
+                const category = option.dataset.category;
+
+                // Check if paper type is available for this size
+                let available = true;
+
+                // Check max size restriction
+                if (maxSize && size) {
+                    const sizeIndex = SIZE_ORDER.indexOf(size);
+                    const maxSizeIndex = SIZE_ORDER.indexOf(maxSize);
+                    if (sizeIndex > maxSizeIndex) {
+                        available = false;
+                    }
+                }
+
+                // Check if price exists for this combination
+                if (size && PRICES[size]?.[category] === null) {
+                    available = false;
+                }
+
+                option.disabled = !available;
+                if (!available && option.selected) {
+                    paperTypeSelect.value = '';
+                }
+            });
+
+            updatePrice();
+        }
+
+        // Generate reference number
+        function generateReferenceNumber() {
+            const timestamp = Date.now().toString().slice(-6);
+            return `PR-${timestamp}`;
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+
+            requiredFields.forEach(field => {
+                const formGroup = field.closest('.form-group') || field.closest('.checkbox-group');
+
+                if (field.type === 'checkbox') {
+                    if (!field.checked) {
+                        isValid = false;
+                        field.closest('.checkbox-label').classList.add('error');
+                    } else {
+                        field.closest('.checkbox-label').classList.remove('error');
+                    }
+                } else if (field.type === 'number') {
+                    const numValue = parseInt(field.value);
+                    if (!field.value.trim() || isNaN(numValue) || numValue < 1) {
+                        isValid = false;
+                        if (formGroup) formGroup.classList.add('error');
+                    } else {
+                        if (formGroup) formGroup.classList.remove('error');
+                    }
+                } else {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        if (formGroup) formGroup.classList.add('error');
+                    } else {
+                        if (formGroup) formGroup.classList.remove('error');
+                    }
+                }
+            });
+
+            // Validate email format
+            const emailField = document.getElementById('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailField.value && !emailRegex.test(emailField.value)) {
+                isValid = false;
+                emailField.closest('.form-group').classList.add('error');
+            }
+
+            // Check if selected combination is valid
+            const size = printSizeSelect.value;
+            const paperOption = paperTypeSelect.selectedOptions[0];
+            if (size && paperOption && paperOption.value) {
+                const category = paperOption.dataset.category;
+                if (PRICES[size]?.[category] === null) {
+                    isValid = false;
+                    alert('This size and paper combination is not available. Please select a different option.');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Collect form data
+        function collectFormData(referenceNumber) {
+            const paperOption = paperTypeSelect.selectedOptions[0];
+            const size = printSizeSelect.value;
+            const category = paperOption?.dataset.category;
+            const unitPrice = PRICES[size]?.[category] || 0;
+            const quantity = parseInt(quantityInput.value) || 1;
+
+            return {
+                referenceNumber: referenceNumber,
+                timestamp: new Date().toISOString(),
+                printSize: size,
+                printDimensions: printSizeSelect.selectedOptions[0]?.dataset.dimensions || '',
+                paperType: paperTypeSelect.value,
+                paperCategory: category,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                totalPrice: unitPrice * quantity,
+                checkDpi: document.getElementById('checkDpi').checked,
+                checkRgb: document.getElementById('checkRgb').checked,
+                checkFlattened: document.getElementById('checkFlattened').checked,
+                firstName: document.getElementById('firstName').value.trim(),
+                surname: document.getElementById('surname').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                universityId: document.getElementById('universityId').value.trim(),
+                course: document.getElementById('course').value,
+                notes: document.getElementById('notes').value.trim()
+            };
+        }
+
+        // Submit form
+        async function submitForm(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const referenceNumber = generateReferenceNumber();
+            const formData = collectFormData(referenceNumber);
+
+            try {
+                // Send to Google Apps Script
+                const response = await fetch(CONFIG.googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Show success message
+                formContainer.classList.add('hidden');
+                successMessage.classList.add('show');
+                document.getElementById('referenceNumber').textContent = referenceNumber;
+
+                // Set upload link with reference number
+                const uploadUrl = new URL(CONFIG.msFormsUrl);
+                uploadUrl.searchParams.set('ref', referenceNumber);
+                document.getElementById('uploadLink').href = uploadUrl.toString();
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('There was an error submitting your request. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Print Request';
+            }
+        }
+
+        // Event listeners
+        printSizeSelect.addEventListener('change', filterPaperOptions);
+        paperTypeSelect.addEventListener('change', updatePrice);
+        quantityInput.addEventListener('input', updatePrice);
+        form.addEventListener('submit', submitForm);
+
+        // Clear error state on input
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('input', () => {
+                const formGroup = field.closest('.form-group');
+                if (formGroup) formGroup.classList.remove('error');
+            });
+        });
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                checkbox.closest('.checkbox-label').classList.remove('error');
+            });
+        });
+
+        // Initial setup
+        filterPaperOptions();
+    </script>
+</body>
+</html>
