@@ -243,7 +243,7 @@ function doPost(e) {
     // Send confirmation email to the student
     // Wrapped in try-catch so email failure doesn't prevent submission
     try {
-      sendConfirmationEmail(data);
+      sendConfirmationEmail(data, folderUrl);
     } catch (emailError) {
       console.error('Failed to send confirmation email:', emailError);
       // Continue - the submission was still successful
@@ -395,8 +395,12 @@ function updateRowStatus(rowNumber, newStatus) {
 
 /**
  * Sends a confirmation email to the student after form submission
+ * @param {Object} data - The form submission data
+ * @param {string} folderUrl - The Google Drive folder URL for file uploads
  */
-function sendConfirmationEmail(data) {
+function sendConfirmationEmail(data, folderUrl) {
+  // Check if we have a valid folder URL
+  const hasFolderUrl = folderUrl && folderUrl.includes('drive.google.com');
   const subject = `Print Request Received - ${data.referenceNumber}`;
 
   const htmlBody = `
@@ -415,7 +419,10 @@ function sendConfirmationEmail(data) {
         .details td { padding: 8px 0; }
         .details td:first-child { font-weight: bold; width: 40%; }
         .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-        .important { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 15px 0; }
+        .upload-section { background: #d4edda; border: 2px solid #28a745; padding: 20px; margin: 20px 0; text-align: center; }
+        .upload-btn { display: inline-block; background: #28a745; color: white; padding: 15px 30px;
+                      text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 5px; margin: 10px 0; }
+        .note { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 15px 0; }
       </style>
     </head>
     <body>
@@ -435,10 +442,19 @@ function sendConfirmationEmail(data) {
 
           <p>Please keep this reference number safe - you will need it when collecting your prints.</p>
 
-          <div class="important">
-            <strong>� Important: Don't forget to upload your files!</strong><br>
-            If you haven't already, please upload your print files via Microsoft Forms using the link provided after submission. Include your reference number when uploading.
+          ${hasFolderUrl ? `
+          <div class="upload-section">
+            <h2 style="margin-top: 0; color: #155724;">📁 UPLOAD YOUR FILES</h2>
+            <a href="${folderUrl}" class="upload-btn">Open Upload Folder</a>
+            <p style="margin-bottom: 0; color: #155724;">
+              Click the button above to open your upload folder.<br>
+              <strong>Drag and drop your files - no sign-in required.</strong>
+            </p>
+            <p style="font-size: 14px; color: #666; margin-bottom: 0;">
+              We accept TIFF, PDF, JPEG, PNG - no file size limit
+            </p>
           </div>
+          ` : ''}
 
           <div class="details">
             <h3>Order Details</h3>
@@ -446,7 +462,7 @@ function sendConfirmationEmail(data) {
               <tr><td>Print Size:</td><td>${data.printSize} (${data.printDimensions})</td></tr>
               <tr><td>Paper Type:</td><td>${data.paperType}</td></tr>
               <tr><td>Quantity:</td><td>${data.quantity}</td></tr>
-              <tr><td>Estimated Price:</td><td>�${data.totalPrice.toFixed(2)}</td></tr>
+              <tr><td>Estimated Price:</td><td>£${data.totalPrice.toFixed(2)}</td></tr>
             </table>
           </div>
 
@@ -468,11 +484,16 @@ function sendConfirmationEmail(data) {
 
           <h3>What Happens Next?</h3>
           <ol>
-            <li>Our technicians will review your request and uploaded files</li>
+            <li>Upload your files using the link above</li>
+            <li>Our technicians will review your request and files</li>
             <li>Your prints will be produced (typically 2-3 working days)</li>
             <li>You will receive an email when your prints are ready for collection</li>
             <li>Collect your prints from the Digital Print room and make payment</li>
           </ol>
+
+          <div class="note">
+            <strong>⚠️ IMPORTANT:</strong> Please delete your uploaded files once you have collected your prints. This helps us maintain the service for all students.
+          </div>
 
           <p>If you have any questions about your order, please reply to this email or contact us directly.</p>
 
@@ -500,14 +521,25 @@ Your Reference Number: ${data.referenceNumber}
 
 Please keep this reference number safe - you will need it when collecting your prints.
 
-IMPORTANT: Don't forget to upload your files! If you haven't already, please upload your print files via Microsoft Forms using the link provided after submission.
+${hasFolderUrl ? `
+========================================
+UPLOAD YOUR FILES
+========================================
+${folderUrl}
+
+Click the link above to open your upload folder.
+Drag and drop your files - no sign-in required.
+
+We accept TIFF, PDF, JPEG, PNG - no file size limit
+========================================
+` : ''}
 
 ORDER DETAILS
 -------------
 Print Size: ${data.printSize} (${data.printDimensions})
 Paper Type: ${data.paperType}
 Quantity: ${data.quantity}
-Estimated Price: �${data.totalPrice.toFixed(2)}
+Estimated Price: £${data.totalPrice.toFixed(2)}
 
 YOUR DETAILS
 ------------
@@ -519,10 +551,13 @@ ${data.notes ? `ADDITIONAL NOTES\n----------------\n${data.notes}\n` : ''}
 
 WHAT HAPPENS NEXT?
 ------------------
-1. Our technicians will review your request and uploaded files
-2. Your prints will be produced (typically 2-3 working days)
-3. You will receive an email when your prints are ready for collection
-4. Collect your prints from the Digital Print room and make payment
+1. Upload your files using the link above
+2. Our technicians will review your request and files
+3. Your prints will be produced (typically 2-3 working days)
+4. You will receive an email when your prints are ready for collection
+5. Collect your prints from the Digital Print room and make payment
+
+IMPORTANT: Please delete your uploaded files once you have collected your prints. This helps us maintain the service for all students.
 
 If you have any questions, please reply to this email.
 
