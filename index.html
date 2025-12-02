@@ -6,7 +6,7 @@
     <title>Digital Print Request | University of Westminster Harrow</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
         :root {
             /* Primary — Ink & Paper */
@@ -40,7 +40,7 @@
             --surface-warm: #fafaf9;
 
             /* Typography */
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
 
             /* Spacing */
@@ -112,17 +112,19 @@
         }
 
         header h1 {
-            font-size: 1.625rem;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            line-height: 1.2;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
         }
 
         header p {
-            margin-top: var(--space-1);
+            margin-top: var(--space-2);
             font-size: 0.8125rem;
             color: var(--stone-muted);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 500;
         }
 
         /* Info Box */
@@ -206,19 +208,19 @@
         }
 
         .price-display .label {
-            font-size: 0.6875rem;
+            font-size: 0.625rem;
             font-weight: 600;
-            color: var(--stone-muted);
+            color: var(--stone-light);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             margin-bottom: var(--space-2);
         }
 
         .price-display .amount {
             font-family: var(--font-mono);
-            font-size: 2.75rem;
+            font-size: 2.5rem;
             font-weight: 500;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
             font-feature-settings: 'tnum' 1;
             line-height: 1;
             transition: transform var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
@@ -250,9 +252,11 @@
         }
 
         .form-section h3 {
-            font-size: 0.8125rem;
+            font-size: 0.6875rem;
             font-weight: 600;
-            color: var(--ink);
+            color: var(--stone);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             margin-bottom: var(--space-4);
             padding-bottom: var(--space-3);
             border-bottom: 1px solid var(--border);
