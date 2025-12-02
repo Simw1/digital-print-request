@@ -678,6 +678,135 @@
             letter-spacing: 0.02em;
         }
 
+        /* Print Items List */
+        .print-items-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .print-item {
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            position: relative;
+        }
+
+        .print-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .print-item-number {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--stone);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .remove-item-btn {
+            background: none;
+            border: none;
+            color: var(--stone-muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: var(--radius-sm);
+            transition: color var(--duration-fast) var(--ease-out),
+                        background-color var(--duration-fast) var(--ease-out);
+        }
+
+        .remove-item-btn:hover {
+            color: var(--error);
+            background: var(--error-muted);
+        }
+
+        .print-item-subtotal {
+            margin-top: var(--space-3);
+            padding-top: var(--space-3);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .print-item-subtotal .label {
+            color: var(--stone);
+        }
+
+        .print-item-subtotal .amount {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .add-item-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: var(--space-3);
+            background: var(--surface);
+            border: 2px dashed var(--border-strong);
+            border-radius: var(--radius-md);
+            color: var(--stone);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color var(--duration-fast) var(--ease-out),
+                        color var(--duration-fast) var(--ease-out),
+                        background-color var(--duration-fast) var(--ease-out);
+        }
+
+        .add-item-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-muted);
+        }
+
+        .add-item-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Filename field guidance */
+        .filename-guidance {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: var(--space-3);
+            margin-bottom: var(--space-4);
+            font-size: 0.8125rem;
+        }
+
+        .filename-guidance strong {
+            display: block;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+
+        .filename-guidance p {
+            color: var(--stone);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .filename-guidance code {
+            background: var(--surface-warm);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+        }
+
         /* Mobile */
         @media (max-width: 600px) {
             .container {
@@ -771,60 +900,23 @@
                     <div class="breakdown" id="priceBreakdown">Select size and paper to calculate</div>
                 </div>
 
-                <!-- Print Configuration -->
+                <!-- Print Items -->
                 <div class="form-section">
-                    <h3>Print Configuration</h3>
+                    <h3>Print Items</h3>
 
-                    <div class="form-group">
-                        <label for="printSize" class="required">Print Size</label>
-                        <select id="printSize" name="printSize" required>
-                            <option value="">Choose a size</option>
-                            <option value="B0" data-dimensions="1000 x 1414 mm" data-plain="10" data-standard="80" data-fibre="112">B0 — 1000 × 1414 mm</option>
-                            <option value="A0" data-dimensions="841 x 1189 mm" data-plain="5" data-standard="40" data-fibre="56">A0 — 841 × 1189 mm</option>
-                            <option value="A1" data-dimensions="594 x 841 mm" data-plain="2.50" data-standard="20" data-fibre="28">A1 — 594 × 841 mm</option>
-                            <option value="A2" data-dimensions="420 x 594 mm" data-plain="1.25" data-standard="10" data-fibre="14">A2 — 420 × 594 mm</option>
-                            <option value="A3" data-dimensions="297 x 420 mm" data-plain="" data-standard="5" data-fibre="7">A3 — 297 × 420 mm</option>
-                            <option value="A4" data-dimensions="210 x 297 mm" data-plain="" data-standard="2.50" data-fibre="">A4 — 210 × 297 mm</option>
-                        </select>
-                        <span class="error-text">Please select a print size</span>
+                    <div class="filename-guidance">
+                        <strong>File Naming Best Practice</strong>
+                        <p>Name your files to match the filename you enter below, e.g. <code>portrait-a1.tiff</code> or <code>landscape-final.pdf</code>. This helps us match your files to the correct print specifications.</p>
                     </div>
 
-                    <div class="form-group">
-                        <label for="paperType" class="required">Paper Type</label>
-                        <select id="paperType" name="paperType" required>
-                            <option value="">Choose a paper</option>
-                            <optgroup label="Standard Papers">
-                                <option value="Spectrum Pinnacle Glossy 270gsm" data-category="standard">Spectrum Pinnacle Glossy 270gsm</option>
-                                <option value="Metallic Gloss 260gsm" data-category="standard">Metallic Gloss 260gsm</option>
-                                <option value="Lustre 300gsm" data-category="standard">Lustre 300gsm</option>
-                                <option value="Satin 270gsm" data-category="standard">Satin 270gsm</option>
-                                <option value="Pearl 295gsm" data-category="standard">Pearl 295gsm</option>
-                                <option value="Matte 230gsm" data-category="standard">Matte 230gsm</option>
-                                <option value="Matte Double Sided 170gsm" data-category="standard" data-max-size="A3">Matte Double Sided 170gsm (A3 max)</option>
-                                <option value="Semigloss Double Sided 250gsm" data-category="standard" data-max-size="A3">Semigloss Double Sided 250gsm (A3 max)</option>
-                                <option value="Epson Premium Semigloss 251gsm" data-category="standard">Epson Premium Semigloss 251gsm</option>
-                                <option value="Fujifilm HI White Smooth Art 260gsm" data-category="standard">Fujifilm HI White Smooth Art 260gsm</option>
-                                <option value="Tetanal IYT-101 You Tac Textile" data-category="standard">Tetanal IYT-101 You Tac Textile</option>
-                                <option value="Kodak Universal Backlit Film" data-category="standard">Kodak Universal Backlit Film</option>
-                                <option value="Fotospeed DC Film" data-category="standard">Fotospeed DC Film</option>
-                            </optgroup>
-                            <optgroup label="Fibre Based Papers">
-                                <option value="Hahnemühle Photo Rag Matt 308gsm" data-category="fibre">Hahnemühle Photo Rag Matt 308gsm</option>
-                                <option value="Hahnemühle FineArt Pearl Gloss 285gsm" data-category="fibre">Hahnemühle FineArt Pearl Gloss 285gsm</option>
-                                <option value="Fujifilm Fine Art Fibre Baryta Gloss 310gsm" data-category="fibre">Fujifilm Fine Art Fibre Baryta Gloss 310gsm</option>
-                            </optgroup>
-                            <optgroup label="Plain Paper">
-                                <option value="Fujifilm Matte Bond 120gsm" data-category="plain">Fujifilm Matte Bond 120gsm</option>
-                            </optgroup>
-                        </select>
-                        <span class="error-text">Please select a paper type</span>
+                    <div class="print-items-container" id="printItemsContainer">
+                        <!-- Print items will be added here by JavaScript -->
                     </div>
 
-                    <div class="form-group">
-                        <label for="quantity" class="required">Quantity</label>
-                        <input type="number" id="quantity" name="quantity" min="1" value="1" required>
-                        <span class="error-text">Enter a quantity of 1 or more</span>
-                    </div>
+                    <button type="button" class="add-item-btn" id="addItemBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add another print
+                    </button>
                 </div>
 
                 <!-- Pre-flight Checks -->
@@ -1006,58 +1098,163 @@
         };
 
         const SIZE_ORDER = ['A4', 'A3', 'A2', 'A1', 'A0', 'B0'];
+        const SIZE_DIMENSIONS = {
+            B0: '1000 × 1414 mm',
+            A0: '841 × 1189 mm',
+            A1: '594 × 841 mm',
+            A2: '420 × 594 mm',
+            A3: '297 × 420 mm',
+            A4: '210 × 297 mm'
+        };
+
+        // Print items state
+        let printItems = [];
+        let itemIdCounter = 0;
 
         // DOM Elements
         const form = document.getElementById('printRequestForm');
         const formContainer = document.getElementById('formContainer');
         const successMessage = document.getElementById('successMessage');
-        const printSizeSelect = document.getElementById('printSize');
-        const paperTypeSelect = document.getElementById('paperType');
-        const quantityInput = document.getElementById('quantity');
+        const printItemsContainer = document.getElementById('printItemsContainer');
+        const addItemBtn = document.getElementById('addItemBtn');
         const totalPriceEl = document.getElementById('totalPrice');
         const priceBreakdownEl = document.getElementById('priceBreakdown');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Update price with animation
-        function updatePrice() {
-            const size = printSizeSelect.value;
-            const paperOption = paperTypeSelect.selectedOptions[0];
-            const quantity = parseInt(quantityInput.value) || 1;
+        // Paper options HTML template
+        const paperOptionsHtml = `
+            <option value="">Choose a paper</option>
+            <optgroup label="Standard Papers">
+                <option value="Spectrum Pinnacle Glossy 270gsm" data-category="standard">Spectrum Pinnacle Glossy 270gsm</option>
+                <option value="Metallic Gloss 260gsm" data-category="standard">Metallic Gloss 260gsm</option>
+                <option value="Lustre 300gsm" data-category="standard">Lustre 300gsm</option>
+                <option value="Satin 270gsm" data-category="standard">Satin 270gsm</option>
+                <option value="Pearl 295gsm" data-category="standard">Pearl 295gsm</option>
+                <option value="Matte 230gsm" data-category="standard">Matte 230gsm</option>
+                <option value="Matte Double Sided 170gsm" data-category="standard" data-max-size="A3">Matte Double Sided 170gsm (A3 max)</option>
+                <option value="Semigloss Double Sided 250gsm" data-category="standard" data-max-size="A3">Semigloss Double Sided 250gsm (A3 max)</option>
+                <option value="Epson Premium Semigloss 251gsm" data-category="standard">Epson Premium Semigloss 251gsm</option>
+                <option value="Fujifilm HI White Smooth Art 260gsm" data-category="standard">Fujifilm HI White Smooth Art 260gsm</option>
+                <option value="Tetanal IYT-101 You Tac Textile" data-category="standard">Tetanal IYT-101 You Tac Textile</option>
+                <option value="Kodak Universal Backlit Film" data-category="standard">Kodak Universal Backlit Film</option>
+                <option value="Fotospeed DC Film" data-category="standard">Fotospeed DC Film</option>
+            </optgroup>
+            <optgroup label="Fibre Based Papers">
+                <option value="Hahnemühle Photo Rag Matt 308gsm" data-category="fibre">Hahnemühle Photo Rag Matt 308gsm</option>
+                <option value="Hahnemühle FineArt Pearl Gloss 285gsm" data-category="fibre">Hahnemühle FineArt Pearl Gloss 285gsm</option>
+                <option value="Fujifilm Fine Art Fibre Baryta Gloss 310gsm" data-category="fibre">Fujifilm Fine Art Fibre Baryta Gloss 310gsm</option>
+            </optgroup>
+            <optgroup label="Plain Paper">
+                <option value="Fujifilm Matte Bond 120gsm" data-category="plain">Fujifilm Matte Bond 120gsm</option>
+            </optgroup>
+        `;
 
-            if (!size || !paperOption || !paperOption.value) {
-                totalPriceEl.textContent = '£0.00';
-                totalPriceEl.classList.remove('unavailable');
-                priceBreakdownEl.textContent = 'Select size and paper to calculate';
-                return;
-            }
+        // Create a new print item
+        function createPrintItem() {
+            const itemId = itemIdCounter++;
+            const itemNumber = printItems.length + 1;
 
-            const category = paperOption.dataset.category;
-            const pricePerUnit = PRICES[size]?.[category];
+            const itemHtml = `
+                <div class="print-item" data-item-id="${itemId}">
+                    <div class="print-item-header">
+                        <span class="print-item-number">Print ${itemNumber}</span>
+                        ${printItems.length > 0 ? '<button type="button" class="remove-item-btn" onclick="removePrintItem(' + itemId + ')">Remove</button>' : ''}
+                    </div>
 
-            if (pricePerUnit === null || pricePerUnit === undefined) {
-                totalPriceEl.textContent = 'Not available';
-                totalPriceEl.classList.add('unavailable');
-                priceBreakdownEl.textContent = 'This combination is not available';
-                return;
-            }
+                    <div class="form-group">
+                        <label for="filename-${itemId}" class="required">Filename</label>
+                        <input type="text" id="filename-${itemId}" name="filename-${itemId}" placeholder="e.g. portrait-final.tiff" required>
+                        <p class="hint">The name of the file you will upload for this print</p>
+                        <span class="error-text">Enter the filename for this print</span>
+                    </div>
 
-            totalPriceEl.classList.remove('unavailable');
-            const total = pricePerUnit * quantity;
-            const newPrice = `£${total.toFixed(2)}`;
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="printSize-${itemId}" class="required">Print Size</label>
+                            <select id="printSize-${itemId}" name="printSize-${itemId}" required onchange="filterPaperOptionsForItem(${itemId})">
+                                <option value="">Choose a size</option>
+                                <option value="B0">B0 — 1000 × 1414 mm</option>
+                                <option value="A0">A0 — 841 × 1189 mm</option>
+                                <option value="A1">A1 — 594 × 841 mm</option>
+                                <option value="A2">A2 — 420 × 594 mm</option>
+                                <option value="A3">A3 — 297 × 420 mm</option>
+                                <option value="A4">A4 — 210 × 297 mm</option>
+                            </select>
+                            <span class="error-text">Please select a print size</span>
+                        </div>
 
-            if (totalPriceEl.textContent !== newPrice) {
-                totalPriceEl.classList.add('updating');
-                setTimeout(() => totalPriceEl.classList.remove('updating'), 150);
-            }
+                        <div class="form-group">
+                            <label for="quantity-${itemId}" class="required">Quantity</label>
+                            <input type="number" id="quantity-${itemId}" name="quantity-${itemId}" min="1" value="1" required oninput="updateTotalPrice()">
+                            <span class="error-text">Enter a quantity of 1 or more</span>
+                        </div>
+                    </div>
 
-            totalPriceEl.textContent = newPrice;
-            priceBreakdownEl.textContent = `£${pricePerUnit.toFixed(2)} × ${quantity} ${quantity === 1 ? 'print' : 'prints'}`;
+                    <div class="form-group">
+                        <label for="paperType-${itemId}" class="required">Paper Type</label>
+                        <select id="paperType-${itemId}" name="paperType-${itemId}" required onchange="updateTotalPrice()">
+                            ${paperOptionsHtml}
+                        </select>
+                        <span class="error-text">Please select a paper type</span>
+                    </div>
+
+                    <div class="print-item-subtotal">
+                        <span class="label">Subtotal:</span>
+                        <span class="amount" id="subtotal-${itemId}">£0.00</span>
+                    </div>
+                </div>
+            `;
+
+            printItems.push({ id: itemId });
+            printItemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+            updateTotalPrice();
+            updateItemNumbers();
+
+            // Add event listeners to clear error states
+            const newItem = document.querySelector(`[data-item-id="${itemId}"]`);
+            newItem.querySelectorAll('input, select').forEach(field => {
+                field.addEventListener('input', () => {
+                    const formGroup = field.closest('.form-group');
+                    if (formGroup) formGroup.classList.remove('error');
+                });
+            });
+
+            return itemId;
         }
 
-        // Filter paper options
-        function filterPaperOptions() {
-            const size = printSizeSelect.value;
-            const options = paperTypeSelect.querySelectorAll('option[data-category]');
+        // Remove a print item
+        function removePrintItem(itemId) {
+            const itemEl = document.querySelector(`[data-item-id="${itemId}"]`);
+            if (itemEl) {
+                itemEl.remove();
+                printItems = printItems.filter(item => item.id !== itemId);
+                updateItemNumbers();
+                updateTotalPrice();
+            }
+        }
+
+        // Update item numbers after removal
+        function updateItemNumbers() {
+            const items = printItemsContainer.querySelectorAll('.print-item');
+            items.forEach((item, index) => {
+                const numberEl = item.querySelector('.print-item-number');
+                if (numberEl) {
+                    numberEl.textContent = `Print ${index + 1}`;
+                }
+                // Show/hide remove button (hide for first item if it's the only one)
+                const removeBtn = item.querySelector('.remove-item-btn');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length === 1 ? 'none' : 'block';
+                }
+            });
+        }
+
+        // Filter paper options based on selected size for a specific item
+        function filterPaperOptionsForItem(itemId) {
+            const sizeSelect = document.getElementById(`printSize-${itemId}`);
+            const paperSelect = document.getElementById(`paperType-${itemId}`);
+            const size = sizeSelect.value;
+            const options = paperSelect.querySelectorAll('option[data-category]');
 
             options.forEach(option => {
                 const maxSize = option.dataset.maxSize;
@@ -1073,10 +1270,85 @@
                 if (size && PRICES[size]?.[category] === null) available = false;
 
                 option.disabled = !available;
-                if (!available && option.selected) paperTypeSelect.value = '';
+                if (!available && option.selected) paperSelect.value = '';
             });
 
-            updatePrice();
+            updateTotalPrice();
+        }
+
+        // Calculate subtotal for a single item
+        function calculateItemSubtotal(itemId) {
+            const sizeSelect = document.getElementById(`printSize-${itemId}`);
+            const paperSelect = document.getElementById(`paperType-${itemId}`);
+            const quantityInput = document.getElementById(`quantity-${itemId}`);
+
+            if (!sizeSelect || !paperSelect || !quantityInput) return { subtotal: 0, unitPrice: 0, quantity: 0, valid: false };
+
+            const size = sizeSelect.value;
+            const paperOption = paperSelect.selectedOptions[0];
+            const quantity = parseInt(quantityInput.value) || 0;
+
+            if (!size || !paperOption || !paperOption.value || quantity < 1) {
+                return { subtotal: 0, unitPrice: 0, quantity, valid: false };
+            }
+
+            const category = paperOption.dataset.category;
+            const unitPrice = PRICES[size]?.[category];
+
+            if (unitPrice === null || unitPrice === undefined) {
+                return { subtotal: 0, unitPrice: 0, quantity, valid: false, unavailable: true };
+            }
+
+            return {
+                subtotal: unitPrice * quantity,
+                unitPrice,
+                quantity,
+                valid: true
+            };
+        }
+
+        // Update total price display
+        function updateTotalPrice() {
+            let grandTotal = 0;
+            let totalItems = 0;
+            let hasInvalidItem = false;
+
+            printItems.forEach(item => {
+                const result = calculateItemSubtotal(item.id);
+                const subtotalEl = document.getElementById(`subtotal-${item.id}`);
+
+                if (result.unavailable) {
+                    if (subtotalEl) subtotalEl.textContent = 'N/A';
+                    hasInvalidItem = true;
+                } else if (result.valid) {
+                    if (subtotalEl) subtotalEl.textContent = `£${result.subtotal.toFixed(2)}`;
+                    grandTotal += result.subtotal;
+                    totalItems += result.quantity;
+                } else {
+                    if (subtotalEl) subtotalEl.textContent = '£0.00';
+                }
+            });
+
+            const newPrice = `£${grandTotal.toFixed(2)}`;
+
+            if (totalPriceEl.textContent !== newPrice) {
+                totalPriceEl.classList.add('updating');
+                setTimeout(() => totalPriceEl.classList.remove('updating'), 150);
+            }
+
+            if (hasInvalidItem) {
+                totalPriceEl.textContent = 'Check items';
+                totalPriceEl.classList.add('unavailable');
+                priceBreakdownEl.textContent = 'One or more items have unavailable combinations';
+            } else if (grandTotal === 0) {
+                totalPriceEl.textContent = '£0.00';
+                totalPriceEl.classList.remove('unavailable');
+                priceBreakdownEl.textContent = 'Configure your prints to see total';
+            } else {
+                totalPriceEl.textContent = newPrice;
+                totalPriceEl.classList.remove('unavailable');
+                priceBreakdownEl.textContent = `${printItems.length} ${printItems.length === 1 ? 'item' : 'items'}, ${totalItems} ${totalItems === 1 ? 'print' : 'prints'} total`;
+            }
         }
 
         // Generate reference number
@@ -1088,7 +1360,66 @@
         // Validate form
         function validateForm() {
             let isValid = true;
-            const requiredFields = form.querySelectorAll('[required]');
+
+            // Validate print items
+            let hasValidItem = false;
+            let hasUnavailableCombination = false;
+
+            printItems.forEach(item => {
+                const filenameField = document.getElementById(`filename-${item.id}`);
+                const sizeSelect = document.getElementById(`printSize-${item.id}`);
+                const paperSelect = document.getElementById(`paperType-${item.id}`);
+                const quantityInput = document.getElementById(`quantity-${item.id}`);
+
+                // Validate filename
+                if (!filenameField.value.trim()) {
+                    isValid = false;
+                    filenameField.closest('.form-group').classList.add('error');
+                }
+
+                // Validate size
+                if (!sizeSelect.value) {
+                    isValid = false;
+                    sizeSelect.closest('.form-group').classList.add('error');
+                }
+
+                // Validate paper
+                if (!paperSelect.value) {
+                    isValid = false;
+                    paperSelect.closest('.form-group').classList.add('error');
+                }
+
+                // Validate quantity
+                const qty = parseInt(quantityInput.value);
+                if (!quantityInput.value.trim() || isNaN(qty) || qty < 1) {
+                    isValid = false;
+                    quantityInput.closest('.form-group').classList.add('error');
+                }
+
+                // Check for unavailable combination
+                if (sizeSelect.value && paperSelect.value) {
+                    const category = paperSelect.selectedOptions[0]?.dataset.category;
+                    if (PRICES[sizeSelect.value]?.[category] === null) {
+                        hasUnavailableCombination = true;
+                        isValid = false;
+                    } else {
+                        hasValidItem = true;
+                    }
+                }
+            });
+
+            if (hasUnavailableCombination) {
+                alert('One or more print items have an unavailable size/paper combination. Please check your selections.');
+                return false;
+            }
+
+            if (!hasValidItem && printItems.length > 0) {
+                alert('Please configure at least one print item.');
+                return false;
+            }
+
+            // Validate other required fields
+            const requiredFields = form.querySelectorAll('[required]:not([id^="filename-"]):not([id^="printSize-"]):not([id^="paperType-"]):not([id^="quantity-"])');
 
             requiredFields.forEach(field => {
                 const formGroup = field.closest('.form-group') || field.closest('.checkbox-group');
@@ -1121,6 +1452,7 @@
                 }
             });
 
+            // Validate email
             const emailField = document.getElementById('email');
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailField.value && !emailRegex.test(emailField.value)) {
@@ -1128,37 +1460,46 @@
                 emailField.closest('.form-group').classList.add('error');
             }
 
-            const size = printSizeSelect.value;
-            const paperOption = paperTypeSelect.selectedOptions[0];
-            if (size && paperOption && paperOption.value) {
-                const category = paperOption.dataset.category;
-                if (PRICES[size]?.[category] === null) {
-                    isValid = false;
-                    alert('This size and paper combination is not available.');
-                }
-            }
-
             return isValid;
         }
 
         // Collect form data
         function collectFormData(referenceNumber) {
-            const paperOption = paperTypeSelect.selectedOptions[0];
-            const size = printSizeSelect.value;
-            const category = paperOption?.dataset.category;
-            const unitPrice = PRICES[size]?.[category] || 0;
-            const quantity = parseInt(quantityInput.value) || 1;
+            // Collect print items
+            const items = printItems.map(item => {
+                const sizeSelect = document.getElementById(`printSize-${item.id}`);
+                const paperSelect = document.getElementById(`paperType-${item.id}`);
+                const quantityInput = document.getElementById(`quantity-${item.id}`);
+                const filenameInput = document.getElementById(`filename-${item.id}`);
+
+                const size = sizeSelect.value;
+                const paperOption = paperSelect.selectedOptions[0];
+                const category = paperOption?.dataset.category;
+                const unitPrice = PRICES[size]?.[category] || 0;
+                const quantity = parseInt(quantityInput.value) || 1;
+
+                return {
+                    filename: filenameInput.value.trim(),
+                    printSize: size,
+                    printDimensions: SIZE_DIMENSIONS[size] || '',
+                    paperType: paperSelect.value,
+                    paperCategory: category,
+                    quantity,
+                    unitPrice,
+                    subtotal: unitPrice * quantity
+                };
+            });
+
+            // Calculate totals
+            const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = items.reduce((sum, item) => sum + item.subtotal, 0);
 
             return {
                 referenceNumber,
                 timestamp: new Date().toISOString(),
-                printSize: size,
-                printDimensions: printSizeSelect.selectedOptions[0]?.dataset.dimensions || '',
-                paperType: paperTypeSelect.value,
-                paperCategory: category,
-                quantity,
-                unitPrice,
-                totalPrice: unitPrice * quantity,
+                printItems: items,
+                totalQuantity,
+                totalPrice,
                 checkDpi: document.getElementById('checkDpi').checked,
                 checkRgb: document.getElementById('checkRgb').checked,
                 checkFlattened: document.getElementById('checkFlattened').checked,
@@ -1246,12 +1587,10 @@
         }
 
         // Event listeners
-        printSizeSelect.addEventListener('change', filterPaperOptions);
-        paperTypeSelect.addEventListener('change', updatePrice);
-        quantityInput.addEventListener('input', updatePrice);
+        addItemBtn.addEventListener('click', createPrintItem);
         form.addEventListener('submit', submitForm);
 
-        document.querySelectorAll('input, select, textarea').forEach(field => {
+        document.querySelectorAll('input:not([id^="filename-"]):not([id^="quantity-"]), select:not([id^="printSize-"]):not([id^="paperType-"]), textarea').forEach(field => {
             field.addEventListener('input', () => {
                 const formGroup = field.closest('.form-group');
                 if (formGroup) formGroup.classList.remove('error');
@@ -1262,8 +1601,8 @@
             checkbox.addEventListener('change', () => updateCheckboxState(checkbox));
         });
 
-        // Initial setup
-        filterPaperOptions();
+        // Initial setup - create first print item
+        createPrintItem();
     </script>
 </body>
 </html>

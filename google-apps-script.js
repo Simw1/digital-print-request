@@ -115,10 +115,8 @@ const HEADERS = [
   'Email',
   'Student ID',
   'Course',
-  'Print Size',
-  'Paper Type',
-  'Paper Category',
-  'Quantity',
+  'Print Items',
+  'Total Quantity',
   'Estimated Price',
   'DPI Check',
   'RGB Check',
@@ -215,9 +213,9 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
 
     // Validate required fields
-    const requiredFields = ['referenceNumber', 'firstName', 'surname', 'email', 'universityId', 'course', 'printSize', 'paperType', 'quantity'];
+    const requiredFields = ['referenceNumber', 'firstName', 'surname', 'email', 'universityId', 'course', 'printItems', 'totalQuantity', 'totalPrice'];
     for (const field of requiredFields) {
-      if (!data[field]) {
+      if (data[field] === undefined || data[field] === null) {
         throw new Error(`Missing required field: ${field}`);
       }
     }
@@ -228,9 +226,17 @@ function doPost(e) {
       throw new Error('Invalid email format');
     }
 
-    // Validate quantity is a positive number
-    if (typeof data.quantity !== 'number' || data.quantity < 1) {
-      throw new Error('Quantity must be a positive number');
+    // Validate print items array
+    if (!Array.isArray(data.printItems) || data.printItems.length === 0) {
+      throw new Error('At least one print item is required');
+    }
+
+    // Validate each print item
+    for (let i = 0; i < data.printItems.length; i++) {
+      const item = data.printItems[i];
+      if (!item.filename || !item.printSize || !item.paperType || !item.quantity || item.quantity < 1) {
+        throw new Error(`Invalid print item at position ${i + 1}`);
+      }
     }
 
     // Create a Google Drive folder for this submission
@@ -272,6 +278,12 @@ function doPost(e) {
       second: '2-digit'
     });
 
+    // Format print items for display in the spreadsheet
+    // Each item on a new line: "filename | Size | Paper | Qty x £price = £subtotal"
+    const printItemsDisplay = data.printItems.map((item, index) => {
+      return `${index + 1}. ${item.filename} | ${item.printSize} | ${item.paperType} | ${item.quantity}x £${item.unitPrice.toFixed(2)} = £${item.subtotal.toFixed(2)}`;
+    }).join('\n');
+
     // Prepare the row data
     const rowData = [
       timestamp,                                    // Timestamp
@@ -283,10 +295,8 @@ function doPost(e) {
       data.email,                                   // Email
       data.universityId,                            // Student ID
       data.course,                                  // Course
-      data.printSize,                               // Print Size
-      data.paperType,                               // Paper Type
-      data.paperCategory,                           // Paper Category
-      data.quantity,                                // Quantity
+      printItemsDisplay,                            // Print Items (formatted)
+      data.totalQuantity,                           // Total Quantity
       '£' + data.totalPrice.toFixed(2),            // Estimated Price
       data.checkDpi ? 'Yes' : 'No',                // DPI Check
       data.checkRgb ? 'Yes' : 'No',                // RGB Check
@@ -406,22 +416,21 @@ function getRowData(rowNumber) {
     timestamp: rowData[0],
     referenceNumber: rowData[1],
     status: rowData[2],
-    firstName: rowData[3],
-    surname: rowData[4],
-    email: rowData[5],
-    studentId: rowData[6],
-    course: rowData[7],
-    printSize: rowData[8],
-    paperType: rowData[9],
-    paperCategory: rowData[10],
-    quantity: rowData[11],
-    estimatedPrice: rowData[12],
-    dpiCheck: rowData[13],
-    rgbCheck: rowData[14],
-    flattenedCheck: rowData[15],
-    notes: rowData[16],
-    readyDate: rowData[17],
-    technicianNotes: rowData[18]
+    uploadFolder: rowData[3],
+    firstName: rowData[4],
+    surname: rowData[5],
+    email: rowData[6],
+    studentId: rowData[7],
+    course: rowData[8],
+    printItems: rowData[9],
+    totalQuantity: rowData[10],
+    estimatedPrice: rowData[11],
+    dpiCheck: rowData[12],
+    rgbCheck: rowData[13],
+    flattenedCheck: rowData[14],
+    notes: rowData[15],
+    readyDate: rowData[16],
+    technicianNotes: rowData[17]
   };
 }
 
@@ -444,7 +453,7 @@ function updateRowStatus(rowNumber, newStatus) {
       hour: '2-digit',
       minute: '2-digit'
     });
-    sheet.getRange(rowNumber, 18).setValue(readyDate); // Ready Date column
+    sheet.getRange(rowNumber, 17).setValue(readyDate); // Ready Date column (column 17)
   }
 }
 
@@ -461,6 +470,32 @@ function sendConfirmationEmail(data, folderUrl) {
   // Check if we have a valid folder URL
   const hasFolderUrl = folderUrl && folderUrl.includes('drive.google.com');
   const subject = `Print Request Received - ${data.referenceNumber}`;
+
+  // Build print items HTML table
+  const printItemsHtml = data.printItems.map((item, index) => `
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${index + 1}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${item.filename}</strong></td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.printSize}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.paperType}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">£${item.subtotal.toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  // Build print items plain text
+  const printItemsPlain = data.printItems.map((item, index) =>
+    `${index + 1}. ${item.filename}\n   Size: ${item.printSize} | Paper: ${item.paperType} | Qty: ${item.quantity} | Subtotal: £${item.subtotal.toFixed(2)}`
+  ).join('\n\n');
+
+  // Build files to upload list
+  const filesToUploadHtml = data.printItems.map(item =>
+    `<li><strong>${item.filename}</strong> - ${item.printSize} print</li>`
+  ).join('');
+
+  const filesToUploadPlain = data.printItems.map(item =>
+    `- ${item.filename} (${item.printSize} print)`
+  ).join('\n');
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -482,6 +517,10 @@ function sendConfirmationEmail(data, folderUrl) {
         .upload-btn { display: inline-block; background: #28a745; color: white; padding: 15px 30px;
                       text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 5px; margin: 10px 0; }
         .note { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 15px 0; }
+        .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .items-table th { background: #1e3a5f; color: white; padding: 10px 8px; text-align: left; font-size: 12px; }
+        .items-table th:last-child { text-align: right; }
+        .total-row td { font-weight: bold; border-top: 2px solid #1e3a5f; padding-top: 10px; }
       </style>
     </head>
     <body>
@@ -503,25 +542,45 @@ function sendConfirmationEmail(data, folderUrl) {
 
           ${hasFolderUrl ? `
           <div class="upload-section">
-            <h2 style="margin-top: 0; color: #155724;">📁 UPLOAD YOUR FILES</h2>
+            <h2 style="margin-top: 0; color: #155724;">Upload Your Files</h2>
             <a href="${folderUrl}" class="upload-btn">Open Upload Folder</a>
             <p style="margin-bottom: 0; color: #155724;">
               Click the button above to open your upload folder.<br>
               <strong>Drag and drop your files - no sign-in required.</strong>
             </p>
-            <p style="font-size: 14px; color: #666; margin-bottom: 0;">
+            <div style="text-align: left; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 5px;">
+              <strong style="color: #155724;">Files to upload:</strong>
+              <ul style="margin: 5px 0 0 0; padding-left: 20px; color: #333;">
+                ${filesToUploadHtml}
+              </ul>
+            </div>
+            <p style="font-size: 14px; color: #666; margin-bottom: 0; margin-top: 15px;">
               We accept TIFF, PDF, JPEG, PNG - no file size limit
             </p>
           </div>
           ` : ''}
 
           <div class="details">
-            <h3>Order Details</h3>
-            <table>
-              <tr><td>Print Size:</td><td>${data.printSize} (${data.printDimensions})</td></tr>
-              <tr><td>Paper Type:</td><td>${data.paperType}</td></tr>
-              <tr><td>Quantity:</td><td>${data.quantity}</td></tr>
-              <tr><td>Estimated Price:</td><td>£${data.totalPrice.toFixed(2)}</td></tr>
+            <h3>Order Details (${data.printItems.length} ${data.printItems.length === 1 ? 'item' : 'items'})</h3>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Filename</th>
+                  <th>Size</th>
+                  <th>Paper</th>
+                  <th style="text-align: center;">Qty</th>
+                  <th style="text-align: right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${printItemsHtml}
+                <tr class="total-row">
+                  <td colspan="4"></td>
+                  <td style="text-align: center; padding-top: 10px;">${data.totalQuantity}</td>
+                  <td style="text-align: right; padding-top: 10px;">£${data.totalPrice.toFixed(2)}</td>
+                </tr>
+              </tbody>
             </table>
           </div>
 
@@ -543,7 +602,7 @@ function sendConfirmationEmail(data, folderUrl) {
 
           <h3>What Happens Next?</h3>
           <ol>
-            <li>Upload your files using the link above</li>
+            <li>Upload your files using the link above (use the filenames listed in your order)</li>
             <li>Our technicians will review your request and files</li>
             <li>Your prints will be produced (typically 2-3 working days)</li>
             <li>You will receive an email when your prints are ready for collection</li>
@@ -551,7 +610,7 @@ function sendConfirmationEmail(data, folderUrl) {
           </ol>
 
           <div class="note">
-            <strong>⚠️ IMPORTANT:</strong> Please delete your uploaded files once you have collected your prints. This helps us maintain the service for all students.
+            <strong>IMPORTANT:</strong> Please delete your uploaded files once you have collected your prints. This helps us maintain the service for all students.
           </div>
 
           <p>If you have any questions about your order, please reply to this email or contact us directly.</p>
@@ -589,16 +648,20 @@ ${folderUrl}
 Click the link above to open your upload folder.
 Drag and drop your files - no sign-in required.
 
+Files to upload:
+${filesToUploadPlain}
+
 We accept TIFF, PDF, JPEG, PNG - no file size limit
 ========================================
 ` : ''}
 
-ORDER DETAILS
--------------
-Print Size: ${data.printSize} (${data.printDimensions})
-Paper Type: ${data.paperType}
-Quantity: ${data.quantity}
-Estimated Price: £${data.totalPrice.toFixed(2)}
+ORDER DETAILS (${data.printItems.length} ${data.printItems.length === 1 ? 'item' : 'items'})
+----------------------------------------------
+${printItemsPlain}
+
+----------------------------------------------
+TOTAL: ${data.totalQuantity} prints | £${data.totalPrice.toFixed(2)}
+----------------------------------------------
 
 YOUR DETAILS
 ------------
@@ -610,7 +673,7 @@ ${data.notes ? `ADDITIONAL NOTES\n----------------\n${data.notes}\n` : ''}
 
 WHAT HAPPENS NEXT?
 ------------------
-1. Upload your files using the link above
+1. Upload your files using the link above (use the filenames listed in your order)
 2. Our technicians will review your request and files
 3. Your prints will be produced (typically 2-3 working days)
 4. You will receive an email when your prints are ready for collection
@@ -694,10 +757,9 @@ function sendReadyEmail(referenceNumber) {
 
           <div class="details">
             <h3>Order Summary</h3>
-            <table>
-              <tr><td>Print Size:</td><td>${data.printSize}</td></tr>
-              <tr><td>Paper Type:</td><td>${data.paperType}</td></tr>
-              <tr><td>Quantity:</td><td>${data.quantity}</td></tr>
+            <div style="background: #f8f9fa; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 13px; white-space: pre-line;">${data.printItems}</div>
+            <table style="margin-top: 15px;">
+              <tr><td>Total Prints:</td><td>${data.totalQuantity}</td></tr>
               <tr><td>Amount Due:</td><td>${data.estimatedPrice}</td></tr>
             </table>
           </div>
@@ -737,9 +799,9 @@ Your Reference Number: ${data.referenceNumber}
 
 ORDER SUMMARY
 -------------
-Print Size: ${data.printSize}
-Paper Type: ${data.paperType}
-Quantity: ${data.quantity}
+${data.printItems}
+
+Total Prints: ${data.totalQuantity}
 Amount Due: ${data.estimatedPrice}
 
 COLLECTION INFORMATION
